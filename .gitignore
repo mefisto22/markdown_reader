@@ -1,0 +1,19 @@
+# Xcode build output
+build/
+DerivedData/
+*.dSYM/
+*.dSYM.zip
+
+# Per-user Xcode state
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+
+# Pre-built app: published as a GitHub Release, not in the repository
+dist/
+
+# Local working notes (paths and session history of this machine)
+handoff.md
+
+# macOS
+.DS_Store
