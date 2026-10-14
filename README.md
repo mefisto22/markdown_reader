@@ -1,4 +1,13 @@
+<p align="center">
+  <a href="#english"><img alt="English" src="https://img.shields.io/badge/English-0A66C2?style=for-the-badge"></a>
+  <a href="#magyar"><img alt="Magyar" src="https://img.shields.io/badge/Magyar-2E7D32?style=for-the-badge"></a>
+</p>
+
+<a id="english"></a>
+
 # Markdown Reader
+
+<p align="right"><a href="#magyar">Magyar ↓</a></p>
 
 A fast, lightweight, native macOS Markdown reader and editor. Double-click a
 `.md` file and it opens in a clean, rendered reading view; press ⌘2 to edit the
@@ -178,8 +187,8 @@ Colors are semantic or dynamic, so Light and Dark Mode switch without
 re-rendering. Selection, copy, printing and PDF export come from
 `NSTextView`. Find in the reader uses `NSTextFinder` with its own client, which
 also searches the text of wide code blocks and tables shown in horizontally
-scrolling views, and scrolls a match into view inside the block. Embedded HTML is never executed. A safe subset is mapped to text
-attributes: line and paragraph structure, headings, alignment, lists, block
+scrolling views, and scrolls a match into view inside the block. Embedded
+HTML is never executed. A safe subset is mapped to text attributes: line and paragraph structure, headings, alignment, lists, block
 quotes, tables (`colspan`/`rowspan`), `<details>`/`<summary>`, emphasis and
 code tags, links and anchors, images, and inline CSS (`style="…"`: color,
 background, weight, style, decoration, size, alignment, `display:none`) and
@@ -308,7 +317,8 @@ not hold hundreds of thousands of equal objects.
 - Print and Export as PDF of the rendered document (always in light colors,
   `<details>` expanded).
 - Optional App Sandbox build with folder access, and a notarization script.
-- Light and Dark Mode: following the system automatically, or fixed to Light or Dark (View ▸ Appearance).
+- Light and Dark Mode: following the system automatically, or fixed to Light
+  or Dark (View ▸ Appearance).
 
 ## Known limitations
 
@@ -378,8 +388,8 @@ On macOS 27.0.1 (Apple Silicon) with Xcode 27.0, for version 1.1:
   crashed once when switching to Match System, inside AppKit's scroller
   appearance handling; it could not be reproduced (several hundred switches
   while scrolling, also through the real menu). Since build 5 the switch is
-  applied after the menu has closed. Remote
-  image downloads and the notarization script (it needs a Developer ID).
+  applied after the menu has closed. Also not exercised: remote image
+  downloads and the notarization script (it needs a Developer ID).
   Their logic is covered by the tests above where possible.
 - **Manually, in the running app (version 1.0):**
   - rendering of every element in `Samples/Showcase.md`, in light and dark mode
@@ -411,3 +421,459 @@ TEST_RUNNER_MDR_SNAPSHOT_DIR=/tmp xcodebuild test -project MarkdownReader.xcodep
 ## License
 
 MIT, see [LICENSE](LICENSE).
+
+---
+
+<a id="magyar"></a>
+
+# Markdown Reader (magyar)
+
+<p align="right"><a href="#english">↑ English</a></p>
+
+Gyors, könnyű, natív macOS-es Markdown-olvasó és -szerkesztő. Egy `.md` fájlra
+duplán kattintva tiszta, renderelt olvasónézetben nyílik meg; ⌘2-vel a forrást
+szerkesztheted, ⌘S-sel menthetsz, ⌘1-gyel visszatérhetsz az olvasáshoz.
+
+- Natív Swift / AppKit / TextKit alkalmazás (SwiftUI csak a tartalomjegyzék-oldalsávhoz)
+- Nincs Electron, WebKit, JavaScript és külső függőség; hálózatot csak akkor
+  használ, ha bekapcsolod a távoli képeket
+- GitHub-féle Markdown, plusz lábjegyzetek, matematikai képletek,
+  Mermaid-diagramok, definíciós listák, emoji-rövidítések és összecsukható
+  `<details>` blokkok, mind natívan renderelve
+- 3,9 MB-os univerzális app (Apple Silicon + Intel), macOS 14 Sonoma vagy újabb
+- Sima `.md` fájlokkal dolgozik: nincs saját formátum, telemetria vagy fiók
+
+## Fordítás
+
+Követelmények: macOS 14+ és Xcode 16 vagy újabb (fejlesztve és tesztelve
+Xcode 27-tel, macOS 27-en, Apple Siliconon).
+
+Xcode-ban: nyisd meg a `MarkdownReader.xcodeproj` fájlt, válaszd a
+**MarkdownReader** sémát, és nyomj ⌘R-t. Önálló app parancssorból:
+
+```bash
+xcodebuild -project MarkdownReader.xcodeproj -scheme MarkdownReader -configuration Release -derivedDataPath build/DerivedData build
+```
+
+Az app ide kerül: `build/DerivedData/Build/Products/Release/Markdown Reader.app`.
+Másold az `/Applications` mappába. Ha alapértelmezett Markdown-megnyitónak
+szeretnéd, jelölj ki egy `.md` fájlt a Finderben, válaszd a **Fájl ▸ Infók**
+menüpontot, a **Megnyitás ezzel** résznél válaszd a *Markdown Reader*-t, majd
+kattints a **Az összes módosítása…** gombra.
+
+A tesztek futtatása:
+
+```bash
+xcodebuild test -project MarkdownReader.xcodeproj -scheme MarkdownReader -destination 'platform=macOS'
+```
+
+A projekt ad-hoc aláírással készül („Sign to Run Locally”), így azon a Mac-en
+fut, amelyik lefordította. A `com.local.MarkdownReader` csomagazonosító a
+target build-beállításaiban módosítható.
+
+### Sandboxos build és terjesztés
+
+Két kiadási konfiguráció van:
+
+| Konfiguráció | App Sandbox | Mire |
+|---|---|---|
+| `Release` | nincs | Helyi használat; a relatív képek és linkek gond nélkül működnek |
+| `Release-Sandboxed` | van (`Config/MarkdownReader-Sandboxed.entitlements`) | Terjesztés, Mac App Store-jellegű biztonság |
+
+```bash
+xcodebuild -project MarkdownReader.xcodeproj -scheme MarkdownReader -configuration Release-Sandboxed -derivedDataPath build/DerivedData build
+```
+
+Sandboxban az app csak a megnyitott fájlt olvashatja, ezért ebben a buildben a
+**File ▸ Grant Folder Access…** (amit akkor is felajánl, ha egy relatív link
+vagy kép blokkolva van) engedélyt kér a dokumentum mappájához. A megadott
+mappákat security-scoped bookmarkként jegyzi meg. A sandbox-jogosultságok: a
+felhasználó által kiválasztott fájlok, ezek a bookmarkok, nyomtatás és kimenő
+kapcsolatok (ez utóbbit csak a távoli képek használják, amelyek alapból ki
+vannak kapcsolva).
+
+Ahhoz, hogy más Mac-eken Gatekeeper-figyelmeztetés nélkül induljon, a *saját*
+Developer ID-del kell aláírni, és az Apple-lel notarizáltatni. A
+`Tools/notarize.sh` a teljes láncot elvégzi (aláírt build hardened runtime-mal
+és biztonságos időbélyeggel, `notarytool` beküldés, stapling,
+Gatekeeper-ellenőrzés), ha van Apple Developer fiókod:
+
+```bash
+xcrun notarytool store-credentials MarkdownReaderNotary --apple-id you@example.com --team-id ABCDE12345
+```
+
+```bash
+TEAM_ID=ABCDE12345 ./Tools/notarize.sh Release-Sandboxed
+```
+
+Előre lefordított példány a GitHub Releases alatt található (zip és
+`SHA256SUMS.txt`). Ad-hoc aláírású, ezért más Mac-en a Gatekeeper nem engedi
+közvetlenül megnyitni; fordítsd le forrásból, vagy futtasd a fenti
+notarizáló scriptet.
+
+## Használat
+
+| Művelet | Billentyű |
+|---|---|
+| Olvasó / Szerkesztő / Osztott nézet | ⌘1 / ⌘2 / ⌘3 (az eszköztáron is) |
+| Címsor-tartalomjegyzék megjelenítése / elrejtése | ⌃⌘S (eszköztár-gomb) |
+| Keresés, Keresés és csere | ⌘F, ⌥⌘F (⌘G / ⇧⌘G következő/előző) |
+| Nagyobb / kisebb / eredeti betűméret | ⌘+ / ⌘− / ⌘0 (az aktív panelre) |
+| Félkövér, dőlt, kód, áthúzott, link | ⌘B, ⌘I, ⇧⌘K, ⇧⌘X, ⌘K (szerkesztő) |
+| Mentés, Mentés másként, Visszaállítás, PDF-export, Nyomtatás | ⌘S, ⇧⌘S, File menü, File menü, ⌘P |
+
+A `Samples/Showcase.md` az alapelemeket, a `Samples/Extensions.md` minden
+bővítményt bemutat (matek, diagramok, lábjegyzetek, details, CSS, széles
+tartalom).
+
+Az olvasóban a feladat-jelölőnégyzetre kattintva kipipálhatod vagy
+visszavonhatod (a forrás változik; ⌘Z visszavonja), a `<details>`
+összefoglalójára kattintva kinyithatod vagy becsukhatod, a széles kódblokkokat
+és táblázatokat pedig oldalra görgetheted. A lábjegyzetszám a jegyzethez
+ugrik, a ↩︎ vissza.
+
+A szerkesztőben az Enter folytatja a listákat, feladatlistákat (`- [ ] `) és
+idézeteket, üres elemen pedig lezárja a listát. A Tab és Shift-Tab
+be- és kihúzza a listaelemeket. A sima behúzott sorok megtartják a
+behúzásukat.
+
+Fájlt megnyithatsz dupla kattintással a Finderben, a File ▸ Open (⌘O) és Open
+Recent menüből, a Dock-ikonra vagy egy ablakra húzva. Egy másik Markdown-fájlra
+mutató relatív link új ablakban nyílik meg, a `#horgony` linkek a címsorhoz
+görgetnek. Minden ablaknak saját nézetmódja van. Az ablakok lépcsőzetesen
+nyílnak, és natívan füllé fűzhetők (Window ▸ Merge All Windows, vagy a
+rendszer „Fülek előnyben részesítése” beállítása).
+
+A **View** menüben van a néhány megjegyzett beállítás: olvasási szélesség,
+fix szélességű szerkesztőbetű, szintaxiskiemelés, sortörés, szinkron görgetés
+osztott nézetben (alapból be; bármelyik panel görgetése mozgatja a másikat),
+**Load Remote Images** (távoli képek, alapból ki) és **Appearance**
+(megjelenés): *Match System* (alapértelmezett; a macOS beállítását követi, és
+vele együtt vált, az *Automatikus* módot is beleértve), *Light* (világos) vagy
+*Dark* (sötét). Az app megjegyzi az utolsó nézetmódot, az ablakméretet, a
+betűméreteket, a tartalomjegyzék láthatóságát és az osztás arányát is.
+
+## Felépítés
+
+```
+MarkdownReader/
+  App/        main.swift (AppKit belépési pont), AppDelegate, MainMenu (menük kódban)
+  Document/   MarkdownDocument (NSDocument), TextDecoding (kódolások, BOM)
+  Markdown/   BlockParser, InlineParser, AST, segédfüggvények, HTML-entitások
+              (teljes HTML5-tábla) és tagek, DetailsGrouping, EmojiShortcodes
+  Rendering/  MarkdownRenderer (AST → NSAttributedString), PreviewController
+              (inkrementális frissítés), PreviewTextView, csatolmányok, linkkezelés,
+              CodeHighlighter, MathRenderer, MermaidRenderer, HTMLStyle (CSS),
+              ScrollableBlock (széles tartalom), PreviewFindClient (keresés az olvasóban),
+              RemoteImageLoader
+  Editor/     EditorController, EditorTextView (listaszerkesztés), SyntaxHighlighter,
+              ListContinuation, EditorStyle
+  Window/     DocumentWindowController (eszköztár, oldalsáv, parancsok),
+              DocumentContentViewController (módok, osztott nézet, szinkron görgetés),
+              tartalomjegyzék (SwiftUI) és állapotsor
+  Support/    Preferences, UserActivity (rövid szeletek interakció közben), TextKit 1
+              segédek, LineIndex, TextStatistics, LaunchTrace,
+              FolderAccess (sandbox-bookmarkok)
+Config/       Info.plist, sandbox-jogosultságok
+Tools/        ikongenerátor, notarize.sh
+MarkdownReaderTests/  116 unit-, integrációs és renderelési teszt
+```
+
+### Döntések és kompromisszumok
+
+**Dokumentummodell: AppKit `NSDocument`, nem SwiftUI `DocumentGroup`.** A
+`DocumentGroup` mindig helyben menti automatikusan a fájlt, nincs benne
+Mentés másként, „Menti a módosításokat?” kérdés, és nem kezelhetők a külső
+változások. A klasszikus `NSDocument` natív Megnyitás / Legutóbbiak / Mentés /
+Mentés másként / Visszaállítás funkciót ad, a módosítás-jelző pöttyöt,
+fájlkoordinációt (`NSFilePresenter`), összeomlás elleni vázlatmentést,
+ablak-visszaállítást és a beépített „a fájl megváltozott, mióta megnyitottad”
+ellenőrzést mentés előtt. A dokumentum egyetlen igazságforrása egy
+`NSTextStorage`: a szerkesztő közvetlenül ezt szerkeszti (másolatok nélkül),
+az olvasó pedig figyeli.
+
+**Parser: saját CommonMark + GFM parser, függőségek nélkül.** Az Apple
+`AttributedString(markdown:)` jól kezeli az inline Markdownt, de nem ad
+layouthoz használható blokkszerkezetet, renderelhető táblázatokat,
+feladatlistákat vagy forráspozíciókat. Az Apple `swift-markdown` csomagja
+külső függőség lenne egy C-könyvtárral. Ez a parser kétfázisú CommonMark
+blokkparser (konténerek, lusta folytatás, szoros/laza listák, setext
+címsorok, HTML-blokkok, hivatkozásdefiníciók, GFM-táblázatok és feladatok,
+valamint lábjegyzet-definíciók, `$$` matekblokkok és definíciós listák),
+delimiter-stack alapú inline parserrel (kiemelési szabályok, linkek/képek,
+hivatkozásos linkek, kódrészletek, autolinkek, GFM-áthúzás és csupasz URL-ek,
+lábjegyzet-hivatkozások, `$…$` matek, `:emoji:` rövidítések, a teljes
+HTML5-entitáslista). UTF-8 bájtokon dolgozik; a Markdown-szintaxis ASCII,
+így az ékezetes és egyéb nem ASCII szöveg érintetlenül halad át. Az inline
+tartalom lustán, blokkonként, csak rendereléskor parszolódik. Egy 5 MB-os
+dokumentum blokkparszolása Release buildben kb. 0,2 s.
+
+**Renderelés: natív TextKit 1, nem webnézet.** Egy `WKWebView` külön
+webtartalom-folyamatot, lassabb első megjelenést és JavaScript/HTML
+biztonsági felületet jelentene. Ehelyett az AST `NSAttributedString`-gé
+alakul. A kódblokkok és idézetek `NSTextBlock`-ot, a táblázatok
+`NSTextTable`-t, a képek és vízszintes vonalak az ablakszélességgel skálázódó
+csatolmánycellákat használnak. A színek szemantikusak vagy dinamikusak, így a
+világos és sötét mód újrarenderelés nélkül vált. A kijelölés, másolás,
+nyomtatás és PDF-export az `NSTextView`-ból jön. Az olvasó keresője
+`NSTextFinder`-t használ saját klienssel, amely a vízszintesen görgethető
+nézetekben megjelenő széles kódblokkok és táblázatok szövegében is keres, és
+a találatot a blokkon belül is láthatóvá görgeti. A beágyazott HTML soha nem
+fut le. Egy biztonságos részhalmaza szövegattribútumokká alakul: sor- és
+bekezdésszerkezet, címsorok, igazítás, listák, idézetek, táblázatok
+(`colspan`/`rowspan`), `<details>`/`<summary>`, kiemelő és kódtagek, linkek
+és horgonyok, képek, inline CSS (`style="…"`: szín, háttér, vastagság,
+stílus, díszítés, méret, igazítás, `display:none`) és `<font>`. A scriptek,
+űrlapok, keretek és `<style>` stíluslapok kimaradnak.
+
+**Matek és diagramok: natív rendererek, nem KaTeX vagy Mermaid.js.** Mindkettő
+JavaScript-motort igényelne. A `MathRenderer` a dokumentumokban használt
+TeX-részhalmazt (törtek, gyökök, indexek és határok, nagy operátorok,
+nyújtható `\left…\right` határolók, ékezetek,
+`matrix`/`pmatrix`/`cases`/`aligned` környezetek, `\mathbb` és `\mathcal`
+típusú betűtípusok, színek, `\text`) TeX-szerű térközökkel dobozokká alakítja,
+és vektorosan rajzolja ki a rendszer STIX Two Math betűtípusával. A
+`MermaidRenderer` folyamatábrákat (minden irány, csomópontformák,
+élstílusok és -címkék, részgráfok, `style`/`classDef`), szekvenciadiagramokat
+és kördiagramokat parszol, a folyamatábrákat rétegzett (Sugiyama-típusú)
+algoritmussal rendezi el, és AppKittel rajzolja ki. Mindkettő kicsinyedik
+keskeny ablakban, és élesen nyomtatható.
+
+**Kód: nyelvfüggő kiemelés.** Egy táblázatvezérelt tokenizáló kb. 40 nyelvet
+színez (Swift, C-család, Java/Kotlin, JavaScript/TypeScript, Python, Ruby,
+Go, Rust, shell, SQL, JSON/YAML/TOML, HTML/XML, CSS, diff és mások),
+Xcode-szerű világos és sötét témával.
+
+**Széles tartalom: vízszintes görgetés.** A TextKit nem tud a
+szövegkonténernél szélesebb blokkot elrendezni, ezért az olvasóoszlopnál
+szélesebb kódblokk vagy táblázat egy vízszintesen görgethető nézetbe kerül,
+egy helyet foglaló csatolmány fölé (a függőleges görgetés továbbmegy az
+oldalra). A beférő blokkok sima szövegek maradnak, és ablakátméretezéskor
+csak azok a blokkok renderelődnek újra, amelyeknél a szélességi küszöb
+átlépődött.
+
+**Távoli képek: csak kérésre.** Ha a View ▸ Load Remote Images ki van
+kapcsolva (alapértelmezés), az app nem indít hálózati kérést; a távoli képek
+helyén helyőrző látszik. Bekapcsolva a képek a háttérben töltődnek le (ideiglenes
+munkamenet, sütik nélkül, 25 MB-os korláttal), és csak az őket tartalmazó
+blokkok renderelődnek újra.
+
+**Élő előnézet: inkrementális.** Minden felső szintű blokk kulcsa a
+forrásának hash-e. Szerkesztés után csak a változatlan eleje és vége közötti
+blokkok renderelődnek újra és illesztődnek be, így a dokumentum többi
+részének görgetési pozíciója és elrendezése megmarad. A frissítések a
+dokumentum méretével arányosan késleltetettek (60–600 ms). A nagy
+dokumentumok a főszálon kívül parszolódnak, és ~35 ms-os szeletekben
+renderelődnek, így az első képernyő azonnal megjelenik. Amíg a felhasználó
+görget, húz vagy gépel (az utolsó 0,5 s-ban), a renderelés és a szerkesztő
+kiemelése 3 ms-os szeletekre vált, köztük 10 ms szünettel, így a run loop
+üresjáratba kerülhet, és az AppKit minden képkockát kirajzolhat; a még
+renderelődő dokumentum görgetése is sima marad, a renderelés pedig teljes
+sebességgel fejeződik be, ha a felhasználó abbahagyja. A renderelés közben
+kért újrarenderelés (például az ablak megnyitásakor az első
+szélességváltás) az aktuális parse-t használja újra.
+
+**Szerkesztő: TextKit 1 `NSTextView`** nem folytonos layouttal. A
+szintaxiskiemelés inkrementális: a blokkszerkezetet soronként követi (minden
+sor tárolja az állapotát: nyitott kódkerítés, behúzott kód, bekezdés- és
+listakörnyezet), az inline jelölést bekezdésenként illeszti, így a több soron
+átívelő kiemelés és a behúzott kódblokkok is színeződnek. Szerkesztés után az
+újrakiemelés a szerkesztett bekezdésnél kezdődik, és leáll, amint a tárolt
+állapot ismét egyezik. A teljes menetek (megnyitáskor vagy beállításváltás
+után) rövid főszálas szeletekben futnak (interakció közben még rövidebbekben,
+lásd fent).
+
+**A felhasználói adatok biztonsága.** A mentés atomi (NSDocument safe-save). A
+fájlok abban a kódolásban íródnak vissza, amelyben beolvasódtak (UTF-8, UTF-8
+BOM-mal, UTF-16, vagy egy felismert régi kódolás, pl. Windows-1250), a
+sorvégek pedig soha nem változnak. Ha a fájl megváltozik a lemezen
+(`NSFilePresenter`-értesítések, plusz egy olcsó módosítási dátum-ellenőrzés,
+amikor egy ablak aktívvá válik; nincs folyamatos lekérdezés):
+
+- Ha nincs helyi módosítás, a dokumentum csendben újratöltődik.
+- Ha van helyi módosítás, az app rákérdez: *Keep My Version* (saját változat
+  megtartása) vagy *Reload from Disk* (újratöltés a lemezről).
+- Ha újabb fájlra mentenél, az NSDocument „Mégis menti?” figyelmeztetése
+  továbbra is megjelenik.
+
+Ha egy régi kódolású fájlba olyan karakter kerül, amelyet az a kódolás nem tud
+ábrázolni (például emoji egy Windows-1250-es fájlban), mentéskor az app
+rákérdez, mielőtt UTF-8-ra alakítaná; az összeomlás elleni vázlatok soha nem
+változtatnak kódolást.
+
+Azt, hogy van-e „helyi módosítás”, a visszavonásra épülő módosított állapot
+és az utoljára betöltött vagy mentett szöveg hash-e együtt dönti el, így
+egyetlen szerkesztési útvonal sem tűnhet tévesen változatlannak.
+
+**SwiftUI vagy AppKit.** A SwiftUI a tartalomjegyzék-oldalsávot adja, és csak
+az oldalsáv első megnyitásakor jön létre. Mérések szerint a SwiftUI-nézetek
+az indulási útvonalon kb. 55 ms-mal késleltették az ablak megjelenését. Mivel
+a sebesség a legfontosabb, a mindig látható állapotsor egyszerű AppKit-címkéket
+használ. A szövegnézetek AppKit-alapúak, mert csak a TextKittel érhető el ez a
+szerkesztési és renderelési teljesítmény.
+
+**App Sandbox: választható build.** Egy sandboxos app fájlmegnyitáskor csak
+ahhoz az egy fájlhoz kap hozzáférést, így a relatív képekhez
+(`![](images/a.png)`) és linkekhez mappa-hozzáférés kell. Az alapértelmezett
+`Release` build nem sandboxos, ami egy helyben fordított segédprogramnál a
+gördülékenyebb kompromisszum; a `Release-Sandboxed` sandboxos, és szükség
+esetén mappa-hozzáférést kér (lásd: Fordítás). Mindkettő hardened runtime-ot
+használ.
+
+**Memória.** Az azonos beállítású kódblokkok, idézetek és címsorvonalak
+egyetlen `NSTextBlock`-on osztoznak, és a bekezdésstílusok is közösek, így a
+nagy dokumentumok nem tartanak több százezer egyforma objektumot.
+
+## Megvalósított funkciók
+
+- Ablakonként olvasó, szerkesztő és osztott nézet, azonnal váltható (⌘1/2/3).
+  Váltáskor az olvasási pozíció megmarad.
+- GFM-renderelés: címsorok, bekezdések, kiemelés, áthúzás, inline kód,
+  kerített és behúzott kód, (beágyazott) idézetek, számozott/számozatlan/
+  beágyazott listák, (kattintható) feladatlisták, oszlopigazításos
+  táblázatok, vízszintes vonalak, linkek, hivatkozásos linkek, autolinkek,
+  helyi képek (relatív útvonalak, százalékkódolt nevek, `data:` URI-k), távoli
+  képek (bekapcsolásra), HTML-részhalmaz inline CSS-sel, HTML-táblázatok,
+  összecsukható `<details>`, az összes HTML5-entitás, kemény sortörések.
+- Bővítmények: lábjegyzetek (számozva, a végén összegyűjtve,
+  visszahivatkozással), matek (`$…$`, `$$…$$`, ```` ```math ````),
+  Mermaid-folyamatábrák, szekvencia- és kördiagramok, definíciós listák,
+  `:emoji:` rövidítések.
+- Kódblokkok nyelvfüggő kiemeléssel; a széles kódblokkok és táblázatok
+  vízszintesen görgethetők.
+- Natív fájlkezelés: Megnyitás, Legutóbbiak, dupla kattintás a Finderben
+  (deklarált dokumentumtípus és UTI), ráhúzás a Dock-ikonra vagy ablakra, több
+  ablak, natív fülek, Mentés, Mentés másként, Visszaállítás, figyelmeztetés
+  mentetlen módosításokra, összeomlás elleni vázlatmentés, ablak-visszaállítás.
+- Külső módosítás felismerése folyamatos lekérdezés nélkül, ütközéskezeléssel.
+- Kódolás-felismerés és -megőrzés (UTF-8 ± BOM, UTF-16, Windows-1250,
+  ISO 8859-2, Windows-1252, Mac Roman). A magyar szöveg mindegyikben működik.
+- Szerkesztő: fix vagy arányos betűtípus, inkrementális szintaxiskiemelés (a
+  többsoros kiemeléssel, behúzott kóddal és matekkal együtt), visszavonás/újra,
+  keresés és csere, lista- és idézetfolytatás, listabehúzás,
+  Markdown-formázó parancsok, választható sortörés, mentetlen
+  módosítás jelzése.
+- Osztott nézet: átméretezhető elválasztó (az arányt megjegyzi), élő
+  előnézet, kétirányú szinkron görgetés.
+- Címsorokból épülő tartalomjegyzék-oldalsáv; kattintásra odaugrik (osztott
+  nézetben mindkét panelen).
+- Állapotsor: szavak, karakterek, sorok, kurzor sora és oszlopa, fájlkódolás.
+- Állítható olvasó- és szerkesztőbetűméret, olvasási szélesség (keskeny,
+  közepes, széles, teljes).
+- A renderelt dokumentum nyomtatása és PDF-exportja (mindig világos színekkel,
+  kinyitott `<details>` blokkokkal).
+- Választható App Sandbox build mappa-hozzáféréssel, és notarizáló script.
+- Világos és sötét mód: automatikusan a rendszert követve, vagy rögzítve
+  világosra vagy sötétre (View ▸ Appearance).
+
+## Ismert korlátok
+
+Az első verzióban felsorolt összes korlát meg lett oldva. Ami maradt, az a
+natív rendererek szándékos hatókörhatára:
+
+- **Mermaid:** a folyamatábrák, szekvenciadiagramok és kördiagramok
+  rajzolódnak ki; a többi diagramtípus (osztály-, állapot-, Gantt-, ER- stb.)
+  forrásként jelenik meg egy megjegyzéssel.
+- **Matek:** a dokumentumokban szokásos TeX-részhalmaz támogatott; a
+  felhasználói makrók (`\newcommand`), a `\href` és a felsorolt környezeteken
+  túli csomagok nem. Az ismeretlen parancsok pirosan jelennek meg, ahelyett
+  hogy elrontanák a képletet.
+- **HTML:** csak inline CSS; a `<style>` stíluslapok és osztályszelektorok nem
+  érvényesülnek, az interaktív vagy beágyazott tartalom (űrlapok, keretek,
+  videó) soha nem jelenik meg.
+- **Aláírás:** a más Mac-ekre való terjesztéshez saját Developer ID és
+  notarizálás kell (`Tools/notarize.sh`); az előre lefordított példány
+  ad-hoc aláírású.
+
+## Elvégzett ellenőrzések
+
+macOS 27.0.1-en (Apple Silicon), Xcode 27.0-val, az 1.1-es verzióra:
+
+- **Buildek:** tiszta Debug, Release és Release-Sandboxed build figyelmeztetés
+  nélkül. A Release app univerzális (arm64 és x86_64), 3,9 MB (a növekedést a
+  teljes HTML5-entitástábla, az emojinevek és az új rendererek okozzák),
+  hardened runtime-mal, ad-hoc aláírással. A sandboxos build csak a felsorolt
+  jogosultságokat tartalmazza, és saját konténerrel indul.
+- **Automatikus tesztek:** 116 sikeres. Az alább felsorolt területeken túl
+  lefedik a lábjegyzeteket, definíciós listákat, a matek parszolását és
+  elrendezését, az emoji-rövidítéseket, a `<details>` csoportosítását és
+  nyitását, a Mermaid parszolását és elrendezését, a kódkiemelést, az inline
+  CSS-t és a HTML-táblázatokat, a széles blokkok vízszintes görgetésre
+  váltását, az olvasó keresését a görgethető blokkokban (keresett szöveg,
+  kijelölés, találat-téglalapok, görgetés, overlay-elhelyezés), a rövid
+  munkaszeleteket interakció közben, a renderelés közbeni szélességváltást, a
+  megjelenés-beállítást, a kattintható feladatokat (visszavonással), a
+  többsoros kiemelést és a behúzott kódot a szerkesztőben, a régi kódolású
+  mentés szabályait, a CommonMark-specifikáció tabulátoros és HTML-blokkos
+  példáit, a teljes entitástáblát, valamint a `Samples/Extensions.md`
+  képernyőn kívüli renderelését világos és sötét módban (szemrevételezve).
+  - blokk- és inline parszolás
+  - renderelés (layout-regressziós teszttel)
+  - linkek és képek
+  - biztonságos HTML
+  - kódolások
+  - dokumentum megnyitása → szerkesztés → mentés → újranyitás CRLF-fel és
+    magyar szöveggel
+  - régi kódolás oda-vissza, visszaállítás
+  - nyomtatás és PDF-export
+  - listafolytatás, Tab-behúzás, félkövér kapcsolása, inkrementális
+    kódkerítés-kiemelés
+  - az inkrementális előnézet egyezik a teljes rendereléssel
+  - sorindex, statisztika, sötét módú színek
+- **Memória:** ugyanazon az 5 MB-os dokumentumon (`Samples/Showcase.md`
+  ismételve) a renderelt olvasó tesztkörnyezetben kb. 130–150 MB-ot használ a
+  korábbi 160–170 MB helyett, a Release app memóriafoglalása olvasó módban
+  220–300 MB volt az 1.0-s verzió 245–330 MB-ja helyett (több futás; a
+  szórás abból adódik, mennyi lett már elrendezve). A memória továbbra is a
+  táblázatcellák számával nő, mert minden cella külön szövegblokk.
+- **Görgetés a dokumentum megnyitása közben** (Release build, osztott nézet,
+  az olvasó programozottan görgetve 120 Hz-en közvetlenül megnyitás után;
+  képkockaidők az appon belül mérve): egy 1 MB-os dokumentumnál a 0,5–1 s
+  közötti szakaszban korábban 3 képkocka jött, egyenként ~270 ms-mal; most 37
+  (medián 15 ms), az 1–2 s közötti szakasz pedig 9–10 ms-os mediánnal fut.
+  Egy 100 KB-os dokumentumnál a görgetés már az első fél másodperctől sima.
+  Ami maradt: egy ~0,2–0,4 s-os szünet az ablak első megjelenésekor.
+- **Ebben a körben interaktívan nem kipróbált:** kétirányú szinkron görgetés,
+  a „Save as UTF-8” ablak, az olvasó keresősávja a rendszer `NSTextFinder`
+  felületével (kiemelés, sötétítés; maga a keresőkliens tesztelt), a View ▸
+  Appearance kézi váltása (a beállítás és hatása tesztelt). A 4-es build egyszer
+  összeomlott a Match System-re váltáskor, az AppKit görgetősáv-megjelenés
+  kezelésében; nem sikerült reprodukálni (több száz váltás görgetés közben, a
+  valódi menün keresztül is). Az 5-ös buildtől a váltás a menü bezárása után
+  történik. Szintén nem kipróbált: a távoli képek letöltése és a notarizáló
+  script (ehhez Developer ID kell).
+- **Kézzel, a futó appban (1.0-s verzió):**
+  - a `Samples/Showcase.md` minden elemének renderelése világos és sötét
+    módban
+  - olvasó, szerkesztő és osztott nézet, és hogy minden módváltás megtartja
+    az olvasási pozíciót
+  - élő előnézet gépelés közben
+  - mentés magyar karakterekkel (a lemezen UTF-8-ként ellenőrizve)
+  - csendes újratöltés külső változáskor, és az ütközési kérdés mentetlen
+    módosításoknál
+  - az NSDocument „másik alkalmazás módosította” figyelmeztetése mentéskor
+  - visszaállítás a mentett változatra
+  - tartalomjegyzék-navigáció
+  - relatív `.md` link megnyitása új ablakban, lépcsőzetes ablakokkal
+  - megnyitás LaunchServicesen keresztül (`open -a … file.md`, ugyanaz az
+    útvonal, mint a Finderes dupla kattintás), a frissen bemásolt app első
+    indításával együtt
+  - 5 MB-os dokumentum: ablak ~0,33 s alatt, a görgetés és a szerkesztő mód
+    reszponzív marad
+- **Teljesítmény (Release, meleg indítás, 1.0-s verzió):** kb. 0,35 s a
+  folyamat indulásától a látható ablakig, 0% CPU tétlenül, és kb. 53 MB
+  memória kis dokumentummal. Friss build után az első indítás lassabb, mert a
+  macOS átvizsgálja az új binárist.
+
+Diagnosztika: a binárist `MDR_TRACE=1`-gyel futtatva kiírja az indulási
+időket, `MDR_APPEARANCE=dark` / `light` értékkel pedig a rendszerbeállítás
+módosítása nélkül kényszeríti a megjelenést. A renderelt minta PNG-képeihez
+futtasd a snapshot tesztet egy kimeneti mappával:
+
+```bash
+TEST_RUNNER_MDR_SNAPSHOT_DIR=/tmp xcodebuild test -project MarkdownReader.xcodeproj -scheme MarkdownReader -destination 'platform=macOS' -only-testing:MarkdownReaderTests/SnapshotTests
+```
+
+## Licenc
+
+MIT, lásd: [LICENSE](LICENSE).
