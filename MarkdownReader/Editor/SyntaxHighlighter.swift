@@ -15,9 +15,11 @@ extension NSAttributedString.Key {
 /// paragraph, so emphasis that spans several lines is colored too.
 ///
 /// Edits are highlighted synchronously in the text storage's
-/// `willProcessEditing` callback, from the start of the edited paragraph and
+/// `didProcessEditing` callback, from the start of the edited paragraph and
 /// only until the line state converges again, so typing is O(edited
-/// paragraph). Full-document passes (on open, after preference changes) run
+/// paragraph). Not `willProcessEditing`: attribute changes made there widen
+/// the edited range, and the layout manager then moves the insertion point
+/// to the end of that wider range (the cursor jumped lines down). Full-document passes (on open, after preference changes) run
 /// in short time slices on the main thread so large files never block.
 final class SyntaxHighlighter: NSObject, NSTextStorageDelegate {
     /// Line state: the open fence (character * 1000 + length) in the low
@@ -121,7 +123,7 @@ final class SyntaxHighlighter: NSObject, NSTextStorageDelegate {
 
     // MARK: - NSTextStorageDelegate
 
-    func textStorage(_ textStorage: NSTextStorage, willProcessEditing editedMask: NSTextStorageEditActions,
+    func textStorage(_ textStorage: NSTextStorage, didProcessEditing editedMask: NSTextStorageEditActions,
                      range editedRange: NSRange, changeInLength delta: Int) {
         guard editedMask.contains(.editedCharacters) else { return }
         if let pass = fullPassLocation, editedRange.location < pass {

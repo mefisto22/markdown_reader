@@ -76,6 +76,66 @@ final class EditorBehaviorTests: XCTestCase {
         editor.detach()
     }
 
+    /// Typing and deleting must leave the insertion point right after the
+    /// edit, also when highlighting re-colors lines beyond the edited one.
+    func testTypingKeepsInsertionPoint() {
+        var lines: [String] = ["# Cím", ""]
+        for i in 0..<30 { lines.append("Hosszú bekezdés \(i). sora *dőlt* és **félkövér** szöveggel") }
+        lines += ["", "- elem egy", "- elem kettő", "", "```", "kód", "```", ""]
+        for i in 0..<30 { lines.append("Második bekezdés \(i). sora") }
+        let (doc, editor) = makeEditor(lines.joined(separator: "\n"))
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 600, height: 400), styleMask: [.titled], backing: .buffered, defer: false)
+        window.contentView = editor.scrollView
+        editor.scrollView.frame = window.contentView!.bounds
+        editor.highlighter.rehighlightAll()
+        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+        let tv = editor.textView
+        let ns = doc.text as NSString
+        for probe in ["Hosszú bekezdés 3.", "Hosszú bekezdés 15.", "elem egy", "Második bekezdés 2.", "Cím"] {
+            var location = NSMaxRange(ns.range(of: probe))
+            tv.setSelectedRange(NSRange(location: location, length: 0))
+            for ch in ["x", "y", "*", "z", " ", "`", "q", "_", "w"] {
+                tv.insertText(ch, replacementRange: NSRange(location: NSNotFound, length: 0))
+                location += 1
+                XCTAssertEqual(tv.selectedRange(), NSRange(location: location, length: 0), "typing \(ch) after \(probe)")
+            }
+            for _ in 0..<9 {
+                tv.deleteBackward(nil)
+                location -= 1
+                XCTAssertEqual(tv.selectedRange(), NSRange(location: location, length: 0), "deleting after \(probe)")
+            }
+        }
+        editor.detach()
+    }
+
+    /// Lines re-highlighted beyond the edited one are laid out again.
+    func testHighlightingBeyondEditInvalidatesLayout() {
+        // A proportional font, so code font changes line widths.
+        let wasMonospaced = Preferences.shared.editorMonospaced
+        Preferences.shared.editorMonospaced = false
+        let text = (0..<20).map { "Sor \($0) arányos betűkkel WWWWW iiiii" }.joined(separator: "\n")
+        let (doc, editor) = makeEditor(text)
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 900, height: 600), styleMask: [.titled], backing: .buffered, defer: false)
+        window.contentView = editor.scrollView
+        editor.scrollView.frame = window.contentView!.bounds
+        editor.highlighter.rehighlightAll()
+        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+        let tv = editor.textView
+        let lm = tv.layoutManager!
+        func width(ofLine line: Int) -> CGFloat {
+            let range = (doc.text as NSString).lineRange(for: NSRange(location: LineIndex(doc.textStorage.mutableString).start(ofLine: line), length: 0))
+            lm.ensureLayout(forCharacterRange: range)
+            let glyphs = lm.glyphRange(forCharacterRange: range, actualCharacterRange: nil)
+            return lm.lineFragmentUsedRect(forGlyphAt: glyphs.location, effectiveRange: nil).width
+        }
+        let before = width(ofLine: 10)
+        tv.setSelectedRange(NSRange(location: 0, length: 0))
+        tv.insertText("```\n", replacementRange: NSRange(location: NSNotFound, length: 0))
+        XCTAssertGreaterThan(abs(width(ofLine: 11) - before), 0.5)
+        Preferences.shared.editorMonospaced = wasMonospaced
+        editor.detach()
+    }
+
     func testHighlighterTracksFenceStateIncrementally() {
         let (doc, editor) = makeEditor("a\nb\nc")
         let highlighter = editor.highlighter
